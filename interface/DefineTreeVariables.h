@@ -4,12 +4,12 @@
 #include "TString.h"
 
 //event variables
-int runnumber;
-int lumiblock;
-int eventNumber;
+long runnumber;
+long lumiblock;
+long eventNumber;
 float timestamp;
-int bunchXing;
-int orbitNum;
+long bunchXing;
+long orbitNum;
 
 //primary vertex
 float PV_x;
@@ -42,6 +42,14 @@ std::vector<short> digi_sl;
 std::vector<short> digi_layer;
 std::vector<short> digi_wire;
 std::vector<float> digi_time;
+
+//HO-TP variables
+std::vector<int> hoTPdigi_bits;
+std::vector<int> hoTPdigi_iEta;
+std::vector<int> hoTPdigi_iPhi;
+std::vector<int> hoTPdigi_nSamples;
+std::vector<int> hoTPdigi_raw;
+std::vector<int> hoTPdigi_whichSampleTriggered;
 
 //DT segment variables
 std::vector<short> segm4D_wheel;

@@ -3,6 +3,7 @@ import FWCore.ParameterSet.Config as cms
 myDTNtuple = cms.EDAnalyzer('TTreeGenerator',
                             outputFile =cms.string("DTTree.root"),
                             dtDigiLabel = cms.InputTag("muonDTDigis"),
+                            hoTPLabel = cms.InputTag("hcalDigis"),
                             dtSegmentLabel = cms.InputTag("dt4DSegments"),
                             cscSegmentLabel = cms.InputTag("cscSegments"),
                             dtTrigTwinMuxInLabel= cms.InputTag("twinMuxStage2Digis","PhIn"),

@@ -21,9 +21,13 @@
 
 #include "TrackingTools/GeomPropagators/interface/Propagator.h"
 #include <FWCore/Framework/interface/ConsumesCollector.h>
+#include "DataFormats/Common/interface/SortedCollection.h"
+#include "DataFormats/HcalDigi/interface/HOTriggerPrimitiveDigi.h"
 #include "DataFormats/L1TMuon/interface/RegionalMuonCandFwd.h"
 #include "DataFormats/L1TMuon/interface/RegionalMuonCand.h"
 #include "DataFormats/L1Trigger/interface/Muon.h"
+#include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
+
 
 class DTTTrigBaseSync;
 
@@ -53,6 +57,7 @@ private:
 
   void fill_digi_variables(edm::Handle<DTDigiCollection> dtdigis);
   void fill_digi_variablesSim(edm::Handle< DTDigiSimLinkCollection> dtdigisSim);
+  void fill_hoTP_variables(edm::Handle <edm::SortedCollection <HOTriggerPrimitiveDigi> > hotpHandle);
   void fill_dtsegments_variables(edm::Handle<DTRecSegment4DCollection> segments4D, const DTGeometry* dtGeom_);
   void fill_cscsegments_variables(edm::Handle<CSCSegmentCollection> cscsegments);
   void fill_twinmuxout_variables(edm::Handle<L1MuDTChambPhContainer> localTriggerTwinMuxOut);
@@ -71,7 +76,11 @@ private:
 
   TrajectoryStateOnSurface cylExtrapTrkSam(reco::TrackRef track, const float rho) const;
   FreeTrajectoryState freeTrajStateMuon(const reco::TrackRef track) const;
-
+  
+  edm::InputTag hoTPLabel;
+  edm::EDGetTokenT <edm::SortedCollection <HOTriggerPrimitiveDigi, \
+        edm::StrictWeakOrdering <HOTriggerPrimitiveDigi> > > tok_hoTP;
+  
   edm::InputTag dtDigiLabel_;
   edm::EDGetTokenT<DTDigiCollection> dtDigiToken_ ;
   edm::EDGetTokenT<DTDigiSimLinkCollection> dtDigiTokenSim_ ;
