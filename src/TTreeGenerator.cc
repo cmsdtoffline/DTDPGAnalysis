@@ -17,7 +17,16 @@
 // Modificated M.C Fouz March/2016 for TwinMux and to include tracks extrapolation and times variable
 // Modifications L. Guiducci July 2016 to include TwinMux output data and clean up legacy trigger information
 
+
+// system include files
+#include <memory>
+#include <fstream>
+
+
 // user include files
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+
 #include "DataFormats/CSCRecHit/interface/CSCSegmentCollection.h"
 
 #include "DataFormats/DTDigi/interface/DTDigi.h"
@@ -64,6 +73,9 @@
 #include "Geometry/DTGeometry/interface/DTTopology.h" // New trying to avoid crashes in the topology functions
 #include <DataFormats/MuonDetId/interface/DTLayerId.h> // New trying to avoid crashes in the topology functions
 
+
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
+
 #include "MagneticField/Engine/interface/MagneticField.h"
 
 #include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
@@ -95,6 +107,8 @@ TTreeGenerator::TTreeGenerator(const edm::ParameterSet& pset):
           rpcToken_(consumes<MuonDigiCollection<RPCDetId,RPCDigi> > (pset.getParameter<edm::InputTag>("rpcLabel"))),
           UnpackingRpcRecHitToken_(consumes<RPCRecHitCollection> (pset.getParameter<edm::InputTag>("UnpackingRpcRecHitLabel")))
 {
+    usesResource("TFileService");
+    
     // get the tTrigDBInfo
     theSync =
           DTTTrigSyncFactory::get()->create(pset.getUntrackedParameter<std::string>("tTrigMode"),
@@ -385,7 +399,7 @@ void TTreeGenerator::analyze(const edm::Event& event, const edm::EventSetup& con
     if(runOnRaw_ && hasThetaTwinMux) fill_twinmuxth_variables(localTriggerTwinMux_Th);
 
     //MUONS
-    if(!localDTmuons_) fill_muons_variables(MuList);
+    if(!localDTmuons_) fill_muons_variables(MuList, privtxs);
 
     //GMT
     if(!localDTmuons_) fill_gmt_variables(gmt); // legacy
@@ -721,6 +735,7 @@ void TTreeGenerator::fill_twinmuxout_variables(edm::Handle<L1MuDTChambPhContaine
           ltTwinMuxOut_rpcbit.push_back(iph->RpcBit());
           ltTwinMuxOut_bx.push_back(iph->bxNum());
           ltTwinMuxOut_phi.push_back(iph->phi());
+          ltTwinMuxOut_iPhi.push_back(getIphi(iph));
           ltTwinMuxOut_phiB.push_back(iph->phiB());
           ltTwinMuxOut_is2nd.push_back(iph->Ts2Tag());
           idtltTwinMuxOut++;
@@ -744,12 +759,36 @@ void TTreeGenerator::fill_twinmuxin_variables(edm::Handle<L1MuDTChambPhContainer
           if (iph->Ts2Tag()==1) ltTwinMuxIn_bx.push_back(iph->bxNum()-1);
           else ltTwinMuxIn_bx.push_back(iph->bxNum());
           ltTwinMuxIn_phi.push_back(iph->phi());
+          ltTwinMuxIn_iPhi.push_back(getIphi(iph));
           ltTwinMuxIn_phiB.push_back(iph->phiB());
           ltTwinMuxIn_is2nd.push_back(iph->Ts2Tag());
           idtltTwinMuxIn++;
        }
     }
     return;
+}
+
+int TTreeGenerator::getIphi(std::vector<L1MuDTChambPhDigi>::const_iterator digi_L1MuDTChambPh)
+{
+    double phiGlobal = digi_L1MuDTChambPh->phi() / 4096.0;
+    phiGlobal += 2.0*M_PI/12.0 * (digi_L1MuDTChambPh->scNum() - 1);
+    
+    if(phiGlobal > M_PI)
+    {
+        phiGlobal -= 2*M_PI;
+    }
+    
+    // Segmentation is 0.087
+    double dPhi = 2.0*M_PI / 72.0;
+    
+    if(phiGlobal < 0)
+    {
+        phiGlobal += 2*M_PI;
+    }
+    
+    int iPhi = (int) (phiGlobal/dPhi + 1);
+    
+    return iPhi;
 }
 
 void TTreeGenerator::fill_twinmuxth_variables(edm::Handle<L1MuDTChambThContainer> localTriggerTwinMux_Th)
@@ -768,11 +807,61 @@ void TTreeGenerator::fill_twinmuxth_variables(edm::Handle<L1MuDTChambThContainer
           thcode=thcode | (0x1<<pos);
        ltTwinMux_thHits.push_back(thcode);
        idtltTwinMux_th++;
+       
+       ltTwinMux_thIeta.push_back(getIeta(ith));
     }
     return;
 }
 
-void TTreeGenerator::fill_muons_variables(edm::Handle<reco::MuonCollection> MuList)
+int TTreeGenerator::getIeta(std::vector<L1MuDTChambThDigi>::const_iterator digi_L1MuDTChambTh)
+{
+    int pos = -1;
+    
+    for(unsigned int i = 0; i < 7; i++)
+    {
+        if(digi_L1MuDTChambTh->code(i) == 2)
+        {
+            pos = i;
+        }
+    }
+    
+    if(digi_L1MuDTChambTh->whNum() == -2 || digi_L1MuDTChambTh->whNum() == -1
+            || (digi_L1MuDTChambTh->whNum() == 0
+                    && (digi_L1MuDTChambTh->scNum() == 0 || digi_L1MuDTChambTh->scNum() == 3
+                            || digi_L1MuDTChambTh->scNum() == 4 || digi_L1MuDTChambTh->scNum() == 7
+                            || digi_L1MuDTChambTh->scNum() == 8 || digi_L1MuDTChambTh->scNum() == 11)))
+    {
+        pos = 6 - pos;
+    }
+    
+    if(digi_L1MuDTChambTh->whNum() == -2)
+    {
+        return ((int) (round((-5. / 7.) * (pos + 1) - 10)));
+    }
+    
+    if(digi_L1MuDTChambTh->whNum() == -1)
+    {
+        return ((int) (round((-6. / 7.) * (pos + 1) - 4)));
+    }
+    
+    if(digi_L1MuDTChambTh->whNum() == 0)
+    {
+        return ((int) (round((-8. / 7.) * (pos + 1) + 5)));
+    }
+    
+    if(digi_L1MuDTChambTh->whNum() == 1)
+    {
+        return ((int) (round((-6. / 7.) * (pos + 1) + 11)));
+    }
+    
+    if(digi_L1MuDTChambTh->whNum() == 2){
+        return ((int) (round((-5. / 7.) * (pos + 1) + 16)));
+    }
+    
+    return -99;
+}
+
+void TTreeGenerator::fill_muons_variables(edm::Handle<reco::MuonCollection> MuList, edm::Handle<reco::VertexCollection> privtxs)
 {
     imuons = 0;
     for (reco::MuonCollection::const_iterator nmuon = MuList->begin(); nmuon != MuList->end(); ++nmuon){
@@ -781,6 +870,8 @@ void TTreeGenerator::fill_muons_variables(edm::Handle<reco::MuonCollection> MuLi
        const reco::TrackRef mutrackref = nmuon->outerTrack();
        STAMu_isMuGlobal.push_back(nmuon->isGlobalMuon());
        STAMu_isMuTracker.push_back(nmuon->isTrackerMuon());
+       STAMu_isMuTight.push_back(muon::isTightMuon(*nmuon, (*privtxs)[0]));
+       //printf("muon %d: isTight %d \n", imuons, muon::isTightMuon(*nmuon, (*privtxs)[0]));
        STAMu_numberOfChambers.push_back(nmuon->numberOfChambers());
        STAMu_numberOfMatches.push_back(nmuon->numberOfMatches());
        STAMu_numberOfHits.push_back(mutrackref->numberOfValidHits());
@@ -1076,8 +1167,7 @@ void TTreeGenerator::analyzeBMTF(const edm::Event& event)
                     Bmtf_Pt.push_back(mu->hwPt()*0.5);
                     Bmtf_Eta.push_back(mu->hwEta()*0.010875);
                     Bmtf_FineBit.push_back(mu->hwHF());
-                    Bmtf_Phi.push_back(mu->hwPhi());
-                    //2*mu->hwPhi()*TMath::Pi()/576;
+                    Bmtf_Phi.push_back(mu->hwPhi()*2.0*TMath::Pi()/576.0);
                     int phi = 0;
                     phi = mu->processor()*48 + mu->hwPhi();
                     phi += 576 - 24;
@@ -1168,10 +1258,12 @@ void TTreeGenerator::analyzeBMTF(const edm::Event& event)
 
 void TTreeGenerator::beginJob()
 {
-    outFile = new TFile(outFile_.c_str(), "RECREATE", "");
-    outFile->cd();
+    //outFile = new TFile(outFile_.c_str(), "RECREATE", "");
+    //outFile->cd();
 
-    tree_ = new TTree ("DTTree", "CMSSW DT tree");
+    //tree_ = new TTree ("DTTree", "CMSSW DT tree");
+    
+    tree_ = fs->make<TTree>("DTTree", "CMSSW DT tree");
 
     //Event info
     tree_->Branch("runnumber",&runnumber,"runnumber/L");
@@ -1289,6 +1381,7 @@ void TTreeGenerator::beginJob()
     tree_->Branch("ltTwinMuxIn_quality",&ltTwinMuxIn_quality);
     tree_->Branch("ltTwinMuxIn_bx",&ltTwinMuxIn_bx);
     tree_->Branch("ltTwinMuxIn_phi",&ltTwinMuxIn_phi);
+    tree_->Branch("ltTwinMuxIn_iPhi",&ltTwinMuxIn_iPhi);
     tree_->Branch("ltTwinMuxIn_phiB",&ltTwinMuxIn_phiB);
     tree_->Branch("ltTwinMuxIn_is2nd",&ltTwinMuxIn_is2nd);
 
@@ -1299,6 +1392,7 @@ void TTreeGenerator::beginJob()
     tree_->Branch("ltTwinMuxOut_rpcbit",&ltTwinMuxOut_rpcbit);
     tree_->Branch("ltTwinMuxOut_bx",&ltTwinMuxOut_bx);
     tree_->Branch("ltTwinMuxOut_phi",&ltTwinMuxOut_phi);
+    tree_->Branch("ltTwinMuxOut_iPhi",&ltTwinMuxOut_iPhi);
     tree_->Branch("ltTwinMuxOut_phiB",&ltTwinMuxOut_phiB);
     tree_->Branch("ltTwinMuxOut_is2nd",&ltTwinMuxOut_is2nd);
 
@@ -1307,10 +1401,12 @@ void TTreeGenerator::beginJob()
     tree_->Branch("ltTwinMux_thStation",&ltTwinMux_thStation);
     tree_->Branch("ltTwinMux_thBx",&ltTwinMux_thBx);
     tree_->Branch("ltTwinMux_thHits",&ltTwinMux_thHits);
+    tree_->Branch("ltTwinMux_thIeta",&ltTwinMux_thIeta);
 
     //muon variables
     tree_->Branch("Mu_isMuGlobal",&STAMu_isMuGlobal);
     tree_->Branch("Mu_isMuTracker",&STAMu_isMuTracker);
+    tree_->Branch("Mu_isMuTight",&STAMu_isMuTight);
     tree_->Branch("Mu_numberOfChambers_sta",&STAMu_numberOfChambers);
     tree_->Branch("Mu_numberOfMatches_sta",&STAMu_numberOfMatches);
     tree_->Branch("Mu_numberOfHits_sta",&STAMu_numberOfHits);
@@ -1447,9 +1543,9 @@ void TTreeGenerator::beginJob()
 
 void TTreeGenerator::endJob()
 {
-    outFile->cd();
+    //outFile->cd();
     tree_->Write();
-    outFile->Close();
+    //outFile->Close();
 
     return;
 }
@@ -1541,6 +1637,7 @@ inline void TTreeGenerator::clear_Arrays()
     ltTwinMuxIn_quality.clear();
     ltTwinMuxIn_bx.clear();
     ltTwinMuxIn_phi.clear();
+    ltTwinMuxIn_iPhi.clear();
     ltTwinMuxIn_phiB.clear();
     ltTwinMuxIn_is2nd.clear();
 
@@ -1551,6 +1648,7 @@ inline void TTreeGenerator::clear_Arrays()
     ltTwinMuxOut_rpcbit.clear();
     ltTwinMuxOut_bx.clear();
     ltTwinMuxOut_phi.clear();
+    ltTwinMuxOut_iPhi.clear();
     ltTwinMuxOut_phiB.clear();
     ltTwinMuxOut_is2nd.clear();
 
@@ -1559,10 +1657,12 @@ inline void TTreeGenerator::clear_Arrays()
     ltTwinMux_thStation.clear();
     ltTwinMux_thBx.clear();
     ltTwinMux_thHits.clear();
+    ltTwinMux_thIeta.clear();
 
     //muon variables
     STAMu_isMuGlobal.clear();
     STAMu_isMuTracker.clear();
+    STAMu_isMuTight.clear();
     STAMu_numberOfChambers.clear();
     STAMu_numberOfMatches.clear();
     STAMu_numberOfHits.clear();

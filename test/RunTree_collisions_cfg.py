@@ -50,25 +50,47 @@ process.load("RecoLuminosity.LumiProducer.lumiProducer_cfi")
 process.load("EventFilter.L1TRawToDigi.bmtfDigis_cfi")
 
 #maxEvents = -1
-maxEvents = pow(10, 3)
+#maxEvents = 10 * pow(10, 3)
+maxEvents = 10
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxEvents))
 
-process.source = cms.Source("PoolSource",
-
-
-fileNames = cms.untracked.vstring(
-    #"root://eoscms.cern.ch//eos/cms/store/data/Run2016H/ZeroBiasBunchTrains0/RAW/v1/000/283/171/00000/0050F6E3-F191-E611-88C9-02163E013785.root",
-    #"root://eoscms.cern.ch//eos/cms/store/data/Run2016H/DoubleMuon/RAW/v1/000/281/085/00000/1049C58D-477E-E611-A765-02163E011D78.root",
-    
+sourceFileNames = cms.untracked.vstring([
     # DAS name: /ExpressPhysics/Run2016H-Express-v2/FEVT
-    "root://cms-xrd-global.cern.ch//store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/283/820/00000/000BE88F-ED97-E611-B962-02163E011D7E.root",
+    #"root://cms-xrd-global.cern.ch//store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/283/820/00000/000BE88F-ED97-E611-B962-02163E011D7E.root",
     #"root://cms-xrd-global.cern.ch//store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/283/820/00000/0092B080-0798-E611-AD7E-02163E01184D.root",
     #"root://cms-xrd-global.cern.ch//store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/283/820/00000/00958F3E-FE97-E611-A000-02163E014255.root",
     #"root://cms-xrd-global.cern.ch//store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/283/820/00000/00B04838-E597-E611-882E-02163E0120A4.root",
     #"root://cms-xrd-global.cern.ch//store/express/Run2016H/ExpressPhysics/FEVT/Express-v2/000/283/820/00000/00C5C0B0-EE97-E611-A10B-FA163EE76B26.root",
-),
-secondaryFileNames = cms.untracked.vstring()
+    
+    # Das name: /SingleMuon/Run2016H-ZMu-PromptReco-v2/RAW-RECO
+    "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/DC000F0F-559F-E611-825A-02163E0143B9.root",
+    "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/E0908FC9-539F-E611-BCE9-02163E012634.root",
+    "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/E8BFA3F1-539F-E611-9F33-02163E0136CD.root",
+    "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/EE0E75B2-539F-E611-B967-02163E01349D.root",
+    "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/F055B7E5-539F-E611-8192-02163E0119A7.root",
+    "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/F20D63F7-549F-E611-B25B-FA163E8B6264.root",
+    "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/F4D3933A-559F-E611-9694-02163E014557.root",
+    "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/F6FCD1FE-549F-E611-8047-02163E0146C3.root",
+    "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/FA77BCF4-549F-E611-A9F2-FA163EBCA43B.root",
+    "root://cms-xrd-global.cern.ch//store/data/Run2016H/SingleMuon/RAW-RECO/ZMu-PromptReco-v2/000/284/035/00000/FE558300-559F-E611-8C24-02163E012172.root",
+])
+
+
+#Das name: /SingleMuon/Run2017A-ZMu-PromptReco-v2/RAW-RECO
+sourceFile = "sourceFiles/SingleMuon/SingleMuon-Run2017A-ZMu-PromptReco-v2-RAW-RECO.txt"
+
+#fNames = ""
+#with open(sourceFile) as f:
+#    
+#    fNames = f.readlines()
+#
+#sourceFileNames = cms.untracked.vstring(fNames)
+
+
+process.source = cms.Source("PoolSource",
+    fileNames = sourceFileNames,
+    secondaryFileNames = cms.untracked.vstring()
 )
 
 #this is to select collisions
@@ -133,15 +155,27 @@ process.p = cms.Path( \
     process.rpcRecHits + \
     process.hcalDigis + \
     process.myDTNtuple)
+
+
 # Output
-process.out = cms.OutputModule("PoolOutputModule"
-                               , outputCommands = cms.untracked.vstring(
-                               											"keep *",
-                                                                         "keep *_*_*_testRPCTwinMuxRawToDigi"
-                                                                       , "keep *_*_*_DTNTandRPC"
-																		)
-#                                , fileName = cms.untracked.string("file:cia.root")
-                               , SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("p"))
-)
+process.TFileService = cms.Service("TFileService", fileName = cms.string("DTNtuple.root"))
 
+#process.out = cms.OutputModule("PoolOutputModule", 
+#    outputCommands = cms.untracked.vstring(
+#        "keep *",
+#        "keep *_*_*_testRPCTwinMuxRawToDigi",
+#        "keep *_*_*_DTNTandRPC"
+#    ),
+#    fileName = cms.untracked.string("debug.root"),
+#    SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring("p"))
+#)
 
+process.schedule = cms.Schedule(process.p)
+
+# Debug
+#process.out = cms.OutputModule("PoolOutputModule", 
+#    fileName = cms.untracked.string("debug.root")
+#)
+#
+#process.output_step = cms.EndPath(process.out)
+#process.schedule.extend([process.output_step])

@@ -5,6 +5,9 @@
 #include "TVectorF.h"
 #include "TClonesArray.h"
 
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+
 #include "UserCode/DTDPGAnalysis/interface/DefineTreeVariables.h"
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
@@ -28,13 +31,16 @@
 #include "DataFormats/L1Trigger/interface/Muon.h"
 #include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
 
+#include "DataFormats/L1DTTrackFinder/interface/L1MuDTChambPhContainer.h"
+#include "DataFormats/L1DTTrackFinder/interface/L1MuDTChambThContainer.h"
+
 
 class DTTTrigBaseSync;
 
 //
 // class declaration
 //
-class TTreeGenerator : public edm::EDAnalyzer {
+class TTreeGenerator : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   
 public:
   explicit TTreeGenerator(const edm::ParameterSet&);
@@ -63,7 +69,7 @@ private:
   void fill_twinmuxout_variables(edm::Handle<L1MuDTChambPhContainer> localTriggerTwinMuxOut);
   void fill_twinmuxin_variables(edm::Handle<L1MuDTChambPhContainer> localTriggerTwinMuxIn);
   void fill_twinmuxth_variables(edm::Handle<L1MuDTChambThContainer> localTriggerTwinMux_Th);
-  void fill_muons_variables(edm::Handle<reco::MuonCollection> MuList);
+  void fill_muons_variables(edm::Handle<reco::MuonCollection> MuList, edm::Handle<reco::VertexCollection> privtxs);
   void fill_gmt_variables(const edm::Handle<l1t::MuonBxCollection> & gmt);
   void fill_gt_variables(edm::Handle<L1GlobalTriggerReadoutRecord> gtrr, const L1GtTriggerMenu* menu);
   void fill_hlt_variables(const edm::Event& e, edm::Handle<edm::TriggerResults> hltresults);
@@ -73,6 +79,9 @@ private:
   void analyzeBMTF(const edm::Event& e);
   void analyzeRPCunpacking(const edm::Event& e);
   void analyzeUnpackingRpcRecHit(const edm::Event& e);
+  
+  int getIeta(std::vector<L1MuDTChambThDigi>::const_iterator digi_L1MuDTChambTh);
+  int getIphi(std::vector<L1MuDTChambPhDigi>::const_iterator digi_L1MuDTChambPh);
 
   TrajectoryStateOnSurface cylExtrapTrkSam(reco::TrackRef track, const float rho) const;
   FreeTrajectoryState freeTrajStateMuon(const reco::TrackRef track) const;
@@ -167,5 +176,6 @@ private:
 
   TFile *outFile;
   TTree *tree_;
-
+  
+  edm::Service <TFileService> fs;
 };
