@@ -4,12 +4,12 @@
 #include "TString.h"
 
 //event variables
-int runnumber;
-int lumiblock;
-int eventNumber;
+long runnumber;
+long lumiblock;
+long eventNumber;
 float timestamp;
-int bunchXing;
-int orbitNum;
+long bunchXing;
+long orbitNum;
 
 //primary vertex
 float PV_x;
@@ -42,6 +42,14 @@ std::vector<short> digi_sl;
 std::vector<short> digi_layer;
 std::vector<short> digi_wire;
 std::vector<float> digi_time;
+
+//HO-TP variables
+std::vector<int> hoTPdigi_bits;
+std::vector<int> hoTPdigi_iEta;
+std::vector<int> hoTPdigi_iPhi;
+std::vector<int> hoTPdigi_nSamples;
+std::vector<int> hoTPdigi_raw;
+std::vector<int> hoTPdigi_whichSampleTriggered;
 
 //DT segment variables
 std::vector<short> segm4D_wheel;
@@ -114,6 +122,7 @@ std::vector<short> ltTwinMuxIn_station;
 std::vector<short> ltTwinMuxIn_quality;
 std::vector<short> ltTwinMuxIn_bx;
 std::vector<float> ltTwinMuxIn_phi;
+std::vector<int> ltTwinMuxIn_iPhi;
 std::vector<float> ltTwinMuxIn_phiB;
 std::vector<short> ltTwinMuxIn_is2nd;
 
@@ -124,6 +133,7 @@ std::vector<short> ltTwinMuxOut_quality;
 std::vector<short> ltTwinMuxOut_rpcbit;
 std::vector<short> ltTwinMuxOut_bx;
 std::vector<float> ltTwinMuxOut_phi;
+std::vector<int> ltTwinMuxOut_iPhi;
 std::vector<float> ltTwinMuxOut_phiB;
 std::vector<short> ltTwinMuxOut_is2nd;
 
@@ -132,10 +142,12 @@ std::vector<short> ltTwinMux_thWheel;
 std::vector<short> ltTwinMux_thSector;
 std::vector<short> ltTwinMux_thStation;
 std::vector<short> ltTwinMux_thHits;
+std::vector<int> ltTwinMux_thIeta;
 
 //muon variables
 std::vector<short> STAMu_isMuGlobal;
 std::vector<short> STAMu_isMuTracker;
+std::vector<short> STAMu_isMuTight;
 std::vector<int>   STAMu_numberOfChambers;
 std::vector<int>   STAMu_numberOfMatches;
 std::vector<int>   STAMu_numberOfHits;
@@ -198,10 +210,10 @@ std::vector<int>   rpc_roll;
 std::vector<int>   rpc_ring;
 
 int Bmtf_Size;
-std::vector<short int> Bmtf_Pt;
-std::vector<short int> Bmtf_Eta;
-std::vector<short int> Bmtf_Phi;
-std::vector<short int> Bmtf_GlobalPhi;
+std::vector<double> Bmtf_Pt;
+std::vector<double> Bmtf_Eta;
+std::vector<double> Bmtf_Phi;
+std::vector<double> Bmtf_GlobalPhi;
 std::vector<short int> Bmtf_qual;
 std::vector<short int> Bmtf_ch;
 std::vector<short int> Bmtf_bx;

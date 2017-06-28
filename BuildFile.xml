@@ -1,9 +1,12 @@
 <use name="rootgraphics"/>
 <use name="CalibMuon/DTDigiSync"/>
 <use name="DQMServices/Core"/>
+<use name="DataFormats/Common"/>
+<use name="DataFormats/HcalDigi"/>
 <use name="DataFormats/LTCDigi"/>
 <use name="DataFormats/L1GlobalMuonTrigger"/>
 <use name="DataFormats/Luminosity"/>
+<use name="DataFormats/RPCDigi"/>
 <use name="DataFormats"/>
 <use name="CondFormats/L1TObjects"/>
 <use name="DataFormats/L1GlobalTrigger"/>

@@ -5,6 +5,9 @@
 #include "TVectorF.h"
 #include "TClonesArray.h"
 
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+
 #include "UserCode/DTDPGAnalysis/interface/DefineTreeVariables.h"
 
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
@@ -21,16 +24,23 @@
 
 #include "TrackingTools/GeomPropagators/interface/Propagator.h"
 #include <FWCore/Framework/interface/ConsumesCollector.h>
+#include "DataFormats/Common/interface/SortedCollection.h"
+#include "DataFormats/HcalDigi/interface/HOTriggerPrimitiveDigi.h"
 #include "DataFormats/L1TMuon/interface/RegionalMuonCandFwd.h"
 #include "DataFormats/L1TMuon/interface/RegionalMuonCand.h"
 #include "DataFormats/L1Trigger/interface/Muon.h"
+#include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
+
+#include "DataFormats/L1DTTrackFinder/interface/L1MuDTChambPhContainer.h"
+#include "DataFormats/L1DTTrackFinder/interface/L1MuDTChambThContainer.h"
+
 
 class DTTTrigBaseSync;
 
 //
 // class declaration
 //
-class TTreeGenerator : public edm::EDAnalyzer {
+class TTreeGenerator : public edm::one::EDAnalyzer<edm::one::SharedResources> {
   
 public:
   explicit TTreeGenerator(const edm::ParameterSet&);
@@ -53,12 +63,13 @@ private:
 
   void fill_digi_variables(edm::Handle<DTDigiCollection> dtdigis);
   void fill_digi_variablesSim(edm::Handle< DTDigiSimLinkCollection> dtdigisSim);
+  void fill_hoTP_variables(edm::Handle <edm::SortedCollection <HOTriggerPrimitiveDigi> > hotpHandle);
   void fill_dtsegments_variables(edm::Handle<DTRecSegment4DCollection> segments4D, const DTGeometry* dtGeom_);
   void fill_cscsegments_variables(edm::Handle<CSCSegmentCollection> cscsegments);
   void fill_twinmuxout_variables(edm::Handle<L1MuDTChambPhContainer> localTriggerTwinMuxOut);
   void fill_twinmuxin_variables(edm::Handle<L1MuDTChambPhContainer> localTriggerTwinMuxIn);
   void fill_twinmuxth_variables(edm::Handle<L1MuDTChambThContainer> localTriggerTwinMux_Th);
-  void fill_muons_variables(edm::Handle<reco::MuonCollection> MuList);
+  void fill_muons_variables(edm::Handle<reco::MuonCollection> MuList, edm::Handle<reco::VertexCollection> privtxs);
   void fill_gmt_variables(const edm::Handle<l1t::MuonBxCollection> & gmt);
   void fill_gt_variables(edm::Handle<L1GlobalTriggerReadoutRecord> gtrr, const L1GtTriggerMenu* menu);
   void fill_hlt_variables(const edm::Event& e, edm::Handle<edm::TriggerResults> hltresults);
@@ -68,10 +79,17 @@ private:
   void analyzeBMTF(const edm::Event& e);
   void analyzeRPCunpacking(const edm::Event& e);
   void analyzeUnpackingRpcRecHit(const edm::Event& e);
+  
+  int getIeta(std::vector<L1MuDTChambThDigi>::const_iterator digi_L1MuDTChambTh);
+  int getIphi(std::vector<L1MuDTChambPhDigi>::const_iterator digi_L1MuDTChambPh);
 
   TrajectoryStateOnSurface cylExtrapTrkSam(reco::TrackRef track, const float rho) const;
   FreeTrajectoryState freeTrajStateMuon(const reco::TrackRef track) const;
-
+  
+  edm::InputTag hoTPLabel;
+  edm::EDGetTokenT <edm::SortedCollection <HOTriggerPrimitiveDigi, \
+        edm::StrictWeakOrdering <HOTriggerPrimitiveDigi> > > tok_hoTP;
+  
   edm::InputTag dtDigiLabel_;
   edm::EDGetTokenT<DTDigiCollection> dtDigiToken_ ;
   edm::EDGetTokenT<DTDigiSimLinkCollection> dtDigiTokenSim_ ;
@@ -158,5 +176,6 @@ private:
 
   TFile *outFile;
   TTree *tree_;
-
+  
+  edm::Service <TFileService> fs;
 };
