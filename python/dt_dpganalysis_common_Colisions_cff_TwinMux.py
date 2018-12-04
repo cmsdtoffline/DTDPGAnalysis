@@ -90,7 +90,8 @@ from Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff i
 ##GlobalTag.globaltag = '80X_dataRun2_Express_v7' ##for CMSSW_8_0_X X>0
 ##GlobalTag.globaltag = '80X_dataRun2_Express_v10' ##for CMSSW_8_0_X X>0
 ##GlobalTag.globaltag = '92X_dataRun2_Express_v2' ## For Express after 920 May2017 
-GlobalTag.globaltag = '100X_dataRun2_Express_v2' ## For Express after 10_0_3 (March 2018) 
+##GlobalTag.globaltag = '100X_dataRun2_Express_v2' ## For Express after 10_0_3 (March 2018) 
+GlobalTag.globaltag = '101X_dataRun2_Express_v2' ## For Express after 10_1_7 (End June 2018)
 
 
 
