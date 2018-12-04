@@ -997,12 +997,12 @@ void DTDPGCreateWheelSummary::endJob(){
        padUROSSummary->cd(iFED+1)->SetBottomMargin(0.25);
        if(huROSSummary)
        {
-         // Normalization to total number of events from EventLeght Plot   
-         string histoEventName = myMainFolder + "00-DataIntegrity"+ "/FED" + FEDId.str() +"/FED" + FEDId.str() + "_EventLenght";
+         // Normalization to total number of events from EventLegth Plot   
+         string histoEventName = myMainFolder + "00-DataIntegrity"+ "/FED" + FEDId.str() +"/FED" + FEDId.str() + "_EventLength";
          TH1F * histoEvent = (TH1F*) myFile -> Get(histoEventName.c_str());
          float numbEvents=0;
          if(histoEvent)numbEvents=histoEvent->GetEntries();
-         else cout<< " EventLenght histo not found for FED = " << FEDId.str() << endl;
+         else cout<< " EventLength histo not found for FED = " << FEDId.str() << endl;
 
          if(numbEvents>0)huROSSummary->Scale(1./numbEvents); 
          huROSSummary->SetMaximum(1);
@@ -1191,8 +1191,8 @@ void DTDPGCreateWheelSummary::endJob(){
     std::vector<string> typeHFED;
     typeHFED.push_back("_BXID");
     typeHFED.push_back("_uROSList");
-    typeHFED.push_back("_EventLenght");
-    typeHFED.push_back("_FEDAvgEvLenghtvsLumi");
+    typeHFED.push_back("_EventLength");
+    typeHFED.push_back("_FEDAvgEvLengthvsLumi");
 
     std::vector<TCanvas *>::const_iterator CanvIt  = ct70.begin();
     std::vector<TCanvas *>::const_iterator CanvEnd = ct70.end();
@@ -1230,7 +1230,7 @@ void DTDPGCreateWheelSummary::endJob(){
       pad1->Divide(2,2);
       pad1->Draw();
 
-      if(typeHFEDStr=="_EventLenght") 
+      if(typeHFEDStr=="_EventLength") 
       {
         gStyle->SetOptStat(111111);
         gStyle->SetStatX(0.88);
@@ -1250,13 +1250,13 @@ void DTDPGCreateWheelSummary::endJob(){
 
          TH1F * hHisto= (TH1F*) myFile -> Get(histoName.c_str());
          pad1->cd(iFED+1);
-         if(typeHFEDStr=="_EventLenght") pad1->cd(iFED+1)->SetLogy();
+         if(typeHFEDStr=="_EventLength") pad1->cd(iFED+1)->SetLogy();
          if(hHisto)
          {
            hHisto->GetXaxis()->SetLabelSize(0.05);
            hHisto->GetYaxis()->SetLabelSize(0.05);
 
-           if(typeHFEDStr!="_FEDAvgEvLenghtvsLumi")
+           if(typeHFEDStr!="_FEDAvgEvLengthvsLumi")
               hHisto->Draw();
            else
            { // To be included here the code for detecting "peaks" and "valleys" in LS groups 
@@ -1346,7 +1346,7 @@ void DTDPGCreateWheelSummary::endJob(){
                lumiLabel->SetTextColor(6);
                lumiLabel->Draw();
              }
-           }//END if(typeHFEDStr=="_FEDAvgEvLenghtvsLumi")
+           }//END if(typeHFEDStr=="_FEDAvgEvLengthvsLumi")
          }
          else
          {
@@ -1418,12 +1418,12 @@ void DTDPGCreateWheelSummary::endJob(){
      stringstream FEDId;
      FEDId << minFED + iFED;
 
-     // Normalization to total number of events from EventLeght Plot   
-     string histoEventName = myMainFolder + "00-DataIntegrity"+ "/FED" + FEDId.str() +"/FED" + FEDId.str() + "_EventLenght";
+     // Normalization to total number of events from EventLegth Plot   
+     string histoEventName = myMainFolder + "00-DataIntegrity"+ "/FED" + FEDId.str() +"/FED" + FEDId.str() + "_EventLength";
      TH1F * histoEvent = (TH1F*) myFile -> Get(histoEventName.c_str());
      float numbEvents=0;
      if(histoEvent)numbEvents=histoEvent->GetEntries();
-     else cout<< " EventLenght histo not found for FED = " << FEDId.str() << endl;
+     else cout<< " EventLength histo not found for FED = " << FEDId.str() << endl;
  
      TCanvas * CuROSErrors = new TCanvas("CuROSErrors", "",50,50,1200,900);
 

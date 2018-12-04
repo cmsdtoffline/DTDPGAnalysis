@@ -15,7 +15,8 @@ dtunpacker = cms.EDProducer("DTUnpackingModule",
                             ##inputLabel = cms.InputTag('source'), ## needed for new versions, at least >356  
                             ##inputLabel = cms.InputTag('rawDataCollector'), ## MWGR Feb12
                             ##inputLabel = cms.InputTag('rawDataRepacker'), ## HeavyIons collisions 2015 >CMSSW755 
-                            inputLabel = cms.InputTag('rawDataCollector'), ##  HeavyIons collisions 2016
+                            ##inputLabel = cms.InputTag('rawDataCollector'), ##  HeavyIons collisions 2016
+                            inputLabel = cms.InputTag('rawDataRepacker'), ## HeavyIons collisions 2018 
                             ###useStandardFEDid = cms.untracked.bool(True),
                             useStandardFEDid = cms.bool(True),
                             ###fedbyType = cms.untracked.bool(True),
@@ -47,7 +48,8 @@ from Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff i
 
 
 from RecoLocalMuon.Configuration.RecoLocalMuon_cff import *
-dt1DRecHits.dtDigiLabel = 'dtunpacker'
+##dt1DRecHits.dtDigiLabel = 'dtunpacker'
+dt1DRecHits.dtDigiLabel = 'dturosunpacker'  ## for uROS2018
 
 from RecoTracker.Configuration.RecoTracker_cff import *  ## Needed at least in  710pre8 to avoid an error in RecoMuon file (GroupedCkfTrajectoryBuilder)
 from RecoMuon.Configuration.RecoMuon_cff import *
@@ -92,7 +94,10 @@ from Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff i
 ##GlobalTag.globaltag = 'GR_E_V47' ## With DB V2
 ##GlobalTag.globaltag = '75X_dataRun2_Express_ppAt5TeV_v0' ## o be used for pp reference run @ 5.02 TeV taking operations  
 ##GlobalTag.globaltag = '75X_dataRun2_ExpressHI_v2' ## for HI 2015 
-GlobalTag.globaltag = '80X_dataRun2_Express_v15' ## for HI 2016 
+##GlobalTag.globaltag = '80X_dataRun2_Express_v15' ## for HI 2016 
+GlobalTag.globaltag = '103X_dataRun2_Express_v2' ## for HI 2018 from CMSSW_10_3_0 onwards 
+
+
 
 ##unpackers  = cms.Sequence(dtunpacker + dttfunpacker)
 unpackers  = cms.Sequence(dtunpacker + twinMuxStage2Digis)
@@ -104,15 +109,15 @@ globalreco = cms.Sequence(standAloneMuonSeeds * offlineBeamSpot * standAloneMuon
 # DT DPG DQM modules follow
 
 from UserCode.DTDPGAnalysis.DTOfflineAnalyzer_cfi import *
-###DTOfflineAnalyzer.SALabel = 'standAloneMuons'  ## Problems with this collection with 52X data 2012 
+DTOfflineAnalyzer.SALabel = 'standAloneMuons'  ## Problems with this collection with 52X data 2012 
 ###DTOfflineAnalyzer.SALabel = 'standAloneSETMuons' ## Doesn't exist for HI runs 2015
-DTOfflineAnalyzer.SALabel = 'standAloneSETMuons'  ## Reverting on version 8010_patch3 15/07/2016 because the contents are different
-                                                  ## Again available for HI runs 2016
+###DTOfflineAnalyzer.SALabel = 'standAloneSETMuons'  ## Reverting on version 8010_patch3 15/07/2016 because the contents are different
+###                                                  ## Again available for HI runs 2016
 from UserCode.DTDPGAnalysis.STAOfflineAnalyzer_cfi import *
-###STAOfflineAnalyzer.SALabel = 'standAloneMuons'  ## Problems with this collection with 52X data 2012 
+STAOfflineAnalyzer.SALabel = 'standAloneMuons'  ## Problems with this collection with 52X data 2012 
 ###STAOfflineAnalyzer.SALabel = 'standAloneSETMuons'  ## Doesn't exist for HI runs 2015
-STAOfflineAnalyzer.SALabel = 'standAloneSETMuons' ## Reverting on version 8010_patch3 15/07/2016 because the contents are different
-                                                  ## Again available for HI runs 2016
+###STAOfflineAnalyzer.SALabel = 'standAloneSETMuons' ## Reverting on version 8010_patch3 15/07/2016 because the contents are different
+###                                                  ## Again available for HI runs 2016
 
 from UserCode.DTDPGAnalysis.DTEffOfflineAnalyzer_cfi import *
 
@@ -125,6 +130,7 @@ DTDataIntegrityTask.dtDDULabel = 'dtunpacker'   ## Needed from, at least, 710
 DTDataIntegrityTask.dtROS25Label = 'dtunpacker' ## Needed from, at least, 710  
 
 from DQM.DTMonitorModule.dtDigiTask_cfi import *
+dtDigiMonitor.dtDigiLabel = 'dturosunpacker'  ## for uROS2018
 dtDigiMonitor.readDB = True
 dtDigiMonitor.doNoiseOccupancies = True
 dtDigiMonitor.doInTimeOccupancies = True

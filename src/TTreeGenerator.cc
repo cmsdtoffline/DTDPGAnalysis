@@ -654,9 +654,9 @@ void TTreeGenerator::fill_dtz_info(const DTSLRecSegment2D* zSeg,  const GeomDet*
   int rechitscounter = 0;
   for(std::vector<DTRecHit1D>::const_iterator recHitsIt = zrecHitslist.begin(); recHitsIt!=zrecHitslist.end(); ++recHitsIt){
     const GeomDet * layer = theTrackingGeometry->idToDet(recHitsIt->wireId().layerId());
-    zPosRechits(rechitscounter)    = recHitsIt->localPosition().y();
+    zPosRechits(rechitscounter)    = recHitsIt->localPosition().x();
     zPosChRechits(rechitscounter)  = chamb->toLocal(layer->toGlobal(recHitsIt->localPosition())).y();
-    zPosErrRechits(rechitscounter) = recHitsIt->localPositionError().yy();
+    zPosErrRechits(rechitscounter) = recHitsIt->localPositionError().xx();
     zSideRechits(rechitscounter)   = recHitsIt->lrSide();
     zwireRechits(rechitscounter)   = recHitsIt->wireId().wire();
     zlayerRechits(rechitscounter)  = recHitsIt->wireId().layerId().layer();
